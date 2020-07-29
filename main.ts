@@ -1,6 +1,41 @@
 namespace SpriteKind {
     export const cell = SpriteKind.create()
 }
+function checkForGameOver () {
+    p1Wins = 3
+    p2Wins = 30
+    checks = [
+    markPositions[0] + markPositions[1] + markPositions[2],
+    markPositions[3] + markPositions[4] + markPositions[5],
+    markPositions[6] + markPositions[7] + markPositions[8],
+    markPositions[0] + markPositions[3] + markPositions[6],
+    markPositions[1] + markPositions[4] + markPositions[7],
+    markPositions[2] + markPositions[5] + markPositions[8],
+    markPositions[0] + markPositions[4] + markPositions[8],
+    markPositions[2] + markPositions[4] + markPositions[6]
+    ]
+    for (let check of checks) {
+        if (check == p1Wins) {
+            p2.setPosition(renderCellAsInactive[0], renderCellAsInactive[1])
+            game.splash("P1 wins!")
+            game.over(true, effects.confetti)
+        }
+        if (check == p2Wins) {
+            p1.setPosition(renderCellAsInactive[0], renderCellAsInactive[1])
+            game.splash("P2 wins!")
+            game.over(true, effects.hearts)
+        }
+    }
+    let areCellsAvailable = false;
+    for(let mark of markPositions){
+        if(mark == 0){
+            areCellsAvailable = true;
+        }
+    }
+    if(!areCellsAvailable){
+        game.over(false);
+    }
+}
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (p1Turn && isCellPositionValid) {
         cell2.setPosition(renderCellAsInactive[0], renderCellAsInactive[1])
@@ -61,11 +96,10 @@ p2.setPosition(126, 97)
 })
 function getCellIndx (x: number, y: number) {
     for (let indx3 = 0; indx3 <= allowedCellPositions.length - 1; indx3++) {
-        let bottomRight: number[] = []
-        let topLeft: number[] = []
         coord = allowedCellPositions[indx3]
-        let [topLeft, bottomRight] = coord;
-if (x >= topLeft[0] && x <= bottomRight[0] && y >= topLeft[1] && y <= bottomRight[1]) {
+        topLeft = coord[0]
+        bottomRight = coord[1]
+        if (x >= topLeft[0] && x <= bottomRight[0] && y >= topLeft[1] && y <= bottomRight[1]) {
             return indx3
         }
     }
@@ -84,20 +118,27 @@ function drawCell (x: number, y: number) {
     }
 }
 let mySprite: Sprite = null
-let cellIndex = 0
+let bottomRight: number[] = []
+let topLeft: number[] = []
 let coord: number[][] = []
-let indx2 = 0
 let p2Mark: Sprite = null
-let indx = 0
 let p1Mark: Sprite = null
 let isCellPositionValid = false
+let checks: number[] = []
+let p2Wins = 0
+let p1Wins = 0
 let p2: Sprite = null
 let p1: Sprite = null
 let cell2: Sprite = null
 let renderCellAsInactive: number[] = []
 let renderCellPositions: number[][] = []
 let allowedCellPositions: number[][][] = []
+let cellIndex = 0
+let coord2: number[] = []
+let indx2 = 0
+let indx = 0
 let p1Turn = false
+let markPositions: number[] = []
 allowedCellPositions = [
 [[38, 11], [60, 26]],
 [[67, 11], [92, 26]],
@@ -120,7 +161,7 @@ renderCellPositions = [
 [78, 72],
 [108, 72]
 ]
-let markPositions = [
+markPositions = [
 0,
 0,
 0,
@@ -328,4 +369,5 @@ game.onUpdate(function () {
         p1.setPosition(28, 97)
     }
     drawCell(mySprite.x, mySprite.y)
+    checkForGameOver()
 })
